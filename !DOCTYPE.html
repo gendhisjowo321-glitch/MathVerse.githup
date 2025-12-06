@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MathVerse — Galaxy Quiz</title>
+
+<style>
+:root {
+  --bg1:#c7d7ff; --bg2:#d7b8ff;
+  --text-strong:#3b2a6a; --text:#3b2a6a; --text-soft:#4a398a;
+  --btnColor:#8f6bff; --btnColor2:#5ce1ff; --btnText:white;
+  --galaxy-opacity:0.30;
+  --star-color:#4b0082;
+  --meteor-color:#4b0082;
+}
+.dark-mode {
+  --bg1:#120b2c; --bg2:#1c1144;
+  --text-strong:#AEE8FF; --text:#F5E8FF; --text-soft:#cfbfff;
+  --btnColor:#a88bff; --btnColor2:#5ce1ff; --btnText:#fff;
+  --galaxy-opacity:0.55;
+  --star-color:white;
+  --meteor-color:white;
+}
+body {margin:0;font-family:Poppins,sans-serif;text-align:center;overflow-x:hidden;
+  background:linear-gradient(135deg,var(--bg1),var(--bg2));transition:0.6s ease;}
+#galaxy {position:fixed; inset:0; background:url("https://i.ibb.co/YR2MYJx/galaxy-background.jpg");
+background-size:cover; background-position:center; opacity:var(--galaxy-opacity); z-index:-3; animation:moveGalaxy 35s infinite linear; filter:blur(1.5px);}
+@keyframes moveGalaxy {from{background-position:0 0;} to{background-position:-600px -600px;}}
+.shooting-star {position:fixed; top:-10px; width:4px; height:120px; background:var(--meteor-color); opacity:0.9; z-index:-1; border-radius:50%; box-shadow:0 0 15px var(--meteor-color),0 0 25px var(--meteor-color); animation:fall 60s linear forwards;}
+@keyframes fall {from{transform:translateX(0) translateY(0) rotate(45deg); opacity:1;} to{transform:translateX(400px) translateY(900px) rotate(45deg); opacity:0;}}
+.star {position:fixed; border-radius:50%; background:var(--star-color); opacity:0; animation:twinkle linear infinite, drift linear infinite; box-shadow:0 0 6px var(--star-color), 0 0 12px var(--star-color);}
+@keyframes twinkle {0%{opacity:0;}50%{opacity:1;}100%{opacity:0;}}
+@keyframes drift {0%{transform:translate(0,0);}100%{transform:translate(var(--dx,0px),var(--dy,0px));}}
+.page {display:none; opacity:0; padding:40px 20px; transition:opacity 0.6s;}
+.page.show {display:block; opacity:1;}
+.container {max-width:760px;margin:auto;background:rgba(255,255,255,0.18);border-radius:25px;padding:40px;backdrop-filter:blur(18px);box-shadow:0 8px 35px rgba(0,0,0,0.25);position:relative;}
+h1{color:var(--text-strong); font-weight:700;} h2,p,label{color:var(--text-soft); font-size:1.2em;}
+.btn-liquid{position:relative; padding:14px 40px; margin:12px; background:var(--btnColor); color:var(--btnText); font-weight:700; border-radius:45px; cursor:pointer; border:none; overflow:hidden; font-size:1em; transition:0.3s;}
+.btn-liquid::before,.btn-liquid::after{content:""; position:absolute; width:160%; height:160%; left:-30%; top:-30%; background:radial-gradient(circle,var(--btnColor2),#6eaaff,#b579ff); animation:liquidMove 7s infinite linear; opacity:0.35; border-radius:50%;}
+.btn-liquid::after{animation-duration:5s; opacity:0.25;}
+@keyframes liquidMove{to{transform:translate(25px,25px) rotate(360deg);}}
+.btn-liquid:hover{transform:scale(1.08);}
+.back-btn{position:absolute; top:20px; left:20px; padding:10px 24px; border-radius:30px; background:rgba(255,255,255,0.25); backdrop-filter:blur(6px); border:none; color:var(--text); font-weight:bold; cursor:pointer;}
+
+.dark-toggle{position:fixed;top:20px;right:20px;padding:12px 22px;border-radius:30px;background:rgba(255,255,255,0.22);backdrop-filter:blur(8px);border:none;cursor:pointer;font-weight:600;color:var(--text-soft);}
+</style>
+</head>
+
+<body>
+
+<div id="galaxy"></div>
+
+<script>
+// Meteor & Stars Effect
+setInterval(()=>{
+  let star=document.createElement("div");
+  star.classList.add("shooting-star");
+  star.style.left=Math.random()*window.innerWidth+"px";
+  document.body.appendChild(star);
+  setTimeout(()=>star.remove(),60000);
+},5000);
+for(let i=0;i<60;i++){
+  let b=document.createElement("div");
+  b.classList.add("star");
+  b.style.top=Math.random()*window.innerHeight+"px";
+  b.style.left=Math.random()*window.innerWidth+"px";
+  let size = 3 + Math.random()*6;
+  b.style.width = size+"px";
+  b.style.height = size+"px";
+  let dx = (Math.random()*60 - 30) + "px";
+  let dy = (Math.random()*60 - 30) + "px";
+  b.style.setProperty('--dx', dx);
+  b.style.setProperty('--dy', dy);
+  b.style.animationDuration = (40+Math.random()*20)+"s, "+(1+Math.random()*2)+"s";
+  document.body.appendChild(b);
+}
+</script>
+
+<!-- ======================= -->
+<!--         AUDIO           -->
+<!-- ======================= -->
+
+<audio id="bgm" loop>
+  <source src="https://files.catbox.moe/n9rldj.mp3" type="audio/mp3">
+</audio>
+
+<audio id="clickSfx"><source src="https://files.catbox.moe/f14v35.mp3"></audio>
+<audio id="pageSfx"><source src="https://files.catbox.moe/8x9hnr.mp3"></audio>
+<audio id="correctSfx"><source src="https://files.catbox.moe/xy9p0y.mp3"></audio>
+<audio id="wrongSfx"><source src="https://files.catbox.moe/j0kixy.mp3"></audio>
+<audio id="hoverSfx"><source src="https://files.catbox.moe/1hgk7p.mp3"></audio>
+<audio id="pingSfx"><source src="https://files.catbox.moe/mz0i0t.mp3"></audio>
+
+<button class="dark-toggle" onclick="toggleDark()">🌙/☀️</button>
+
+<!-- ======================= -->
+<!--       HALAMAN UTAMA     -->
+<!-- ======================= -->
+
+<div class="page show" id="home">
+  <div class="container">
+    <h1>Selamat Datang di MathVerse 🌌</h1>
+    <h2>Belajar Matematika menjadi petualangan luar angkasa!</h2>
+    <button class="btn-liquid" onclick="playSound('clickSfx'); goTo('jenjang')">Mulai 🚀</button>
+  </div>
+</div>
+
+<!-- ======================= -->
+<!--        JENJANG          -->
+<!-- ======================= -->
+
+<div class="page" id="jenjang">
+  <div class="container">
+    <button class="back-btn" onclick="playSound('clickSfx'); goTo('home')">← Kembali</button>
+    <h1>Pilih Jenjang</h1>
+    <button class="btn-liquid" onclick="setJenjang('SD')">SD</button>
+    <button class="btn-liquid" onclick="setJenjang('SMP')">SMP</button>
+    <button class="btn-liquid" onclick="setJenjang('SMA')">SMA</button>
+  </div>
+</div>
+
+<!-- ======================= -->
+<!--        KELAS            -->
+<!-- ======================= -->
+
+<div class="page" id="kelas">
+  <div class="container">
+    <button class="back-btn" onclick="playSound('clickSfx'); goTo('jenjang')">← Kembali</button>
+    <h1 id="judulKelas"></h1>
+    <div id="kelasButtons"></div>
+  </div>
+</div>
+
+<!-- ======================= -->
+<!--        ISI KELAS        -->
+<!-- ======================= -->
+
+<div class="page" id="isiKelas">
+  <div class="container">
+    <button class="back-btn" onclick="playSound('clickSfx'); goTo('kelas')">← Kembali</button>
+    <h1 id="judulIsiKelas"></h1>
+
+    <h2>📘 Buku Pembelajaran</h2>
+    <button class="btn-liquid" 
+      onclick="playSound('pingSfx'); window.open('https://drive.google.com/file/d/1H66G05_wVDL-PTo7g19T7qIbtJO_Qr2Y/view?usp=sharing','_blank')">
+      Download Buku
+    </button>
+
+    <h2>📊 PPT Pembelajaran</h2>
+    <button id="pptBtn" class="btn-liquid" onclick="togglePPT()">Buka PPT</button>
+    <div id="pptContainer" style="display:none; margin-top:15px; text-align:left;">
+      <ul>
+        <li>
+          <a href="https://drive.google.com/file/d/1BSGFhmnZxJ_LCuzbzjZ2AhBPbI_12tLZ/view"
+             target="_blank">Materi 1: Bilangan Cacah sampai 10.000</a>
+        </li>
+        <li><a href="#">Materi 2: Pecahan</a></li>
+        <li><a href="#">Materi 3: Pola Bilangan</a></li>
+      </ul>
+    </div>
+
+    <!-- ======================= -->
+    <!--     RUANG DISKUSI       -->
+    <!-- ======================= -->
+
+    <h2>💬 Ruang Diskusi</h2>
+    <div id="discussionArea" 
+         style="display:none; background:rgba(0,0,0,0.2); padding:12px; 
+         border-radius:10px; color:#fff; text-align:left; max-height:200px; overflow-y:auto;"></div>
+
+    <button id="openDiscussionBtn" class="btn-liquid" onclick="openDiscussion()">Buka Diskusi</button>
+    <button id="closeDiscussionBtn" class="btn-liquid" onclick="closeDiscussion()" style="display:none;">Tutup Diskusi</button>
+
+    <div id="discussionInputArea" style="display:none; margin-top:10px;">
+      <input id="discussionInput" placeholder="Tulis komentar di sini..."><br>
+      <input type="file" id="discussionPhoto" accept="image/*"><br>
+      <button class="btn-liquid" onclick="postDiscussion()">Kirim</button>
+      <button class="btn-liquid" onclick="clearDiscussion()">Hapus Semua</button>
+    </div>
+
+    <!-- ======================= -->
+    <!--         KUIS            -->
+    <!-- ======================= -->
+
+    <h2>❓ Kuis</h2>
+    <div id="kuisContainer">
+      <p id="soalKuis"></p>
+      <input id="jawab" placeholder="Tulis jawaban disini">
+      <div class="quiz-btns">
+        <button id="cekBtn" class="btn-liquid" onclick="cekJawaban()">Cek Jawaban</button>
+        <button id="prevBtn" class="btn-liquid" onclick="prevSoal()">Sebelumnya</button>
+        <button id="nextBtn" class="btn-liquid" onclick="nextSoalOrScore()">Selanjutnya</button>
+      </div>
+      <div id="fb" class="feedback"></div>
+      <div id="pembahasan" style="display:none; background:rgba(0,0,0,0.2); padding:10px; color:white; text-align:left;"></div>
+      <div id="score"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- =============================== -->
+<!--         SCRIPT INTI             -->
+<!-- =============================== -->
+
+<script>
+// SOUND
+function playSound(id){ document.getElementById(id).play(); }
+document.querySelectorAll(".btn-liquid").forEach(btn=>{
+  btn.addEventListener("mouseenter",()=>playSound("hoverSfx"));
+});
+function toggleDark(){ document.body.classList.toggle("dark-mode"); }
+
+// Page Navigation
+let jenjang="", kelas="";
+function goTo(page){
+  playSound('clickSfx');
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("show"));
+  setTimeout(()=>{document.getElementById(page).classList.add("show"); playSound('pageSfx');},60);
+}
+function setJenjang(j){
+  jenjang=j; goTo("kelas");
+  document.getElementById("judulKelas").innerText="Pilih Kelas "+j;
+  let list=j==="SD"?[4,5,6]:j==="SMP"?[7,8,9]:[10,11,12];
+  let div=document.getElementById("kelasButtons");
+  div.innerHTML="";
+  list.forEach(k=>{
+    div.innerHTML+=`<button class='btn-liquid' onclick="setKelas(${k})">Kelas ${k}</button>`;
+  });
+}
+function setKelas(k){
+  kelas=k; goTo("isiKelas");
+  document.getElementById("judulIsiKelas").innerText=`Kelas ${k} — ${jenjang}`;
+  currentSoal=0; skor=0; updateKuis(); togglePPT(false); loadDiscussion();
+}
+
+// PPT toggle
+function togglePPT(show=true){
+  let c=document.getElementById("pptContainer");
+  let b=document.getElementById("pptBtn");
+  if(show){
+    if(c.style.display==="none"){c.style.display="block"; b.innerText="Tutup PPT";}
+    else{c.style.display="none"; b.innerText="Buka PPT";}
+  } else {c.style.display="none"; b.innerText="Buka PPT";}
+  playSound("clickSfx");
+}
+
+// Diskusi
+function openDiscussion(){
+  document.getElementById("discussionInputArea").style.display="block";
+  document.getElementById("discussionArea").style.display="block";
+  document.getElementById("openDiscussionBtn").style.display="none";
+  document.getElementById("closeDiscussionBtn").style.display="inline-block";
+  loadDiscussion();
+}
+function closeDiscussion(){
+  document.getElementById("discussionInputArea").style.display="none";
+  document.getElementById("discussionArea").style.display="none";
+  document.getElementById("openDiscussionBtn").style.display="inline-block";
+  document.getElementById("closeDiscussionBtn").style.display="none";
+}
+function postDiscussion(){
+  let inp=document.getElementById("discussionInput");
+  let file=document.getElementById("discussionPhoto");
+  if(inp.value.trim()==="" && !file.files[0]) return;
+  let list=JSON.parse(localStorage.getItem("discussion")||"[]");
+  if(file.files[0]){
+    let reader=new FileReader();
+    reader.onload=e=>{
+      list.push({text:inp.value, img:e.target.result});
+      localStorage.setItem("discussion", JSON.stringify(list));
+      inp.value=""; file.value=""; loadDiscussion();
+    }
+    reader.readAsDataURL(file.files[0]);
+  } else {
+    list.push({text:inp.value, img:null});
+    localStorage.setItem("discussion", JSON.stringify(list));
+    inp.value=""; loadDiscussion();
+  }
+}
+function loadDiscussion(){
+  let list=JSON.parse(localStorage.getItem("discussion")||"[]");
+  let div=document.getElementById("discussionArea"); div.innerHTML="";
+  list.forEach(d=>{
+    div.innerHTML+=`<p>${d.text}</p>${d.img?`<img src="${d.img}" style="max-width:80%">`:''}`;
+  });
+}
+function clearDiscussion(){
+  if(confirm("Hapus semua komentar?")){
+    localStorage.removeItem("discussion");
+    loadDiscussion();
+  }
+}
+
+// Quiz
+let soalList=[
+  {soal:"Bagaimana cara menulis bilangan tiga ribu dua ratus lima puluh empat?", jawaban:"3254",
+   pembahasan:"Caranya:\n3 = ribuan\n2 = ratusan\n5 = puluhan\n4 = satuan\n→ 3254"},
+  {soal:"120 + 345 = ...", jawaban:"465", pembahasan:"120 + 345 = 465"},
+  {soal:"1000 - 278 = ...", jawaban:"722", pembahasan:"1000 - 278 = 722"}
+];
+let currentSoal=0, skor=0;
+
+function updateKuis(){
+  let s=soalList[currentSoal];
+  document.getElementById("soalKuis").innerText=s.soal;
+  document.getElementById("jawab").value="";
+  document.getElementById("fb").innerText="";
+  document.getElementById("pembahasan").innerText=s.pembahasan;
+  document.getElementById("pembahasan").style.display="none";
+  document.getElementById("prevBtn").style.display=currentSoal===0?"none":"inline-block";
+  document.getElementById("nextBtn").innerText=currentSoal===soalList.length-1?"Cek Skor":"Selanjutnya";
+}
+function cekJawaban(){
+  let j=document.getElementById("jawab").value.trim();
+  if(j===soalList[currentSoal].jawaban){
+    skor++; playSound("correctSfx");
+    document.getElementById("fb").innerText="Mantap!";
+  } else {
+    playSound("wrongSfx");
+    document.getElementById("fb").innerText="Masih salah, coba lagi!";
+  }
+  document.getElementById("pembahasan").style.display="block";
+}
+function nextSoalOrScore(){
+  if(currentSoal < soalList.length-1){currentSoal++; updateKuis();}
+  else{document.getElementById("score").innerText=`Skormu: ${skor}/${soalList.length}`;}
+}
+function prevSoal(){
+  if(currentSoal>0){currentSoal--; updateKuis();}
+}
+
+// =============================
+// FIX SUPAYA BGM BISA BERBUNYI
+// =============================
+function enableAudio(){
+  let bgm=document.getElementById("bgm");
+  if(!bgm.paused) return;
+  bgm.volume=0.4;
+  bgm.play().catch(()=>{});
+}
+document.addEventListener("click", enableAudio, { once:true });
+
+// Mute / Unmute BGM
+let isMuted=false;
+function toggleMute(){
+  let bgm=document.getElementById("bgm");
+  isMuted=!isMuted;
+  bgm.muted = isMuted;
+  document.getElementById("muteBtn").innerText = isMuted ? "🔇 Unmute" : "🔊 Mute";
+}
+</script>
+
+<!-- Tombol Mute -->
+<button id="muteBtn" onclick="toggleMute()"
+style="
+  position:fixed; bottom:20px; right:20px;
+  padding:12px 22px; border-radius:30px;
+  background:rgba(255,255,255,0.25);
+  border:none; backdrop-filter:blur(8px);
+  cursor:pointer; font-weight:600;">
+🔊 Mute
+</button>
+
+</body>
+</html>
